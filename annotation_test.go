@@ -1,4 +1,4 @@
-package main
+package ag
 
 import (
 	"github.com/google/go-cmp/cmp"

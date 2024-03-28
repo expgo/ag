@@ -1,4 +1,4 @@
-package main
+package ag
 
 import "go/ast"
 
@@ -9,6 +9,8 @@ import "go/ast"
 		global
 		type
 		func
+		funcRecv
+		funcField
 	}
 */
 type AnnotationType int
@@ -17,10 +19,10 @@ type TypedAnnotation struct {
 	Type        AnnotationType
 	Node        ast.Node
 	Annotations *Annotations
+	Parent      *TypedAnnotation
 }
 
 type GeneratorFactory interface {
-	Types() []AnnotationType
-	Names() []string
-	New([]TypedAnnotation) Generator
+	Annotations() map[string][]AnnotationType // a map of name -> []AnnotationType
+	New([]*TypedAnnotation) Generator
 }

@@ -1,9 +1,9 @@
-package main
+package ag
 
 import (
+	"errors"
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/expgo/factory"
 	"github.com/expgo/generic/stream"
 	"github.com/expgo/structure"
 	"reflect"
@@ -181,10 +181,9 @@ func fixComments(annotationGroup *Annotations, err error) (*Annotations, error) 
 
 var defaultBoolValue = any(Bool{V: true}).(Value)
 
-func AnnotationParamsTo[T any](val *T, a *Annotation) (t *T, err error) {
-	t = val
+func (a *Annotation) To(t any) (err error) {
 	if t == nil {
-		t = factory.New[T]()
+		return errors.New("the input parameter cannot be nil")
 	}
 
 	if a.Params != nil {
@@ -227,6 +226,18 @@ func AnnotationParamsTo[T any](val *T, a *Annotation) (t *T, err error) {
 	return
 }
 
+func (anns *Annotations) FindAnnotationByName(name string) *Annotation {
+	if len(anns.Annotations) > 0 {
+		for _, a := range anns.Annotations {
+			if strings.EqualFold(a.Name.Text, name) {
+				return a
+			}
+		}
+	}
+
+	return nil
+}
+
 func ParseAnnotation(fileName string, text string) (*Annotations, error) {
 	return fixComments(annotationParser.ParseString(fileName, text))
 }
@@ -246,16 +257,4 @@ func GetCommentText(comment *Comment) string {
 		return ""
 	}
 	return comment.Text
-}
-
-func (ag *Annotations) FindAnnotationByName(name string) *Annotation {
-	if len(ag.Annotations) > 0 {
-		for _, a := range ag.Annotations {
-			if strings.EqualFold(a.Name.Text, name) {
-				return a
-			}
-		}
-	}
-
-	return nil
 }
