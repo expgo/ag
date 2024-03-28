@@ -24,5 +24,5 @@ type TypedAnnotation struct {
 
 type GeneratorFactory interface {
 	Annotations() map[string][]AnnotationType // a map of name -> []AnnotationType
-	New([]*TypedAnnotation) Generator
+	New([]*TypedAnnotation) (Generator, error)
 }

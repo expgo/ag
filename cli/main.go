@@ -60,7 +60,11 @@ func GenerateFile(filename string, outputSuffix string) {
 
 	for _, f := range factories {
 		if ftas := filterTypedAnnotation(typedAnnotations, f.Annotations()); len(ftas) > 0 {
-			gens = append(gens, f.New(ftas))
+			gen, e := f.New(ftas)
+			if e != nil {
+				panic(e)
+			}
+			gens = append(gens, gen)
 		}
 	}
 
