@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/expgo/ag/generator"
-	_ "github.com/expgo/enum"
 	"os"
 	"strings"
 )
@@ -42,7 +41,9 @@ func main() {
 		}
 	}
 
-	println(plugins.String())
-
-	generator.GenerateFile(filename, fileSuffix)
+	if len(plugins) > 0 {
+		runPlugins(filename, fileSuffix, plugins)
+	} else {
+		generator.GenerateFile(filename, fileSuffix)
+	}
 }

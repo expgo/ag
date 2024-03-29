@@ -1,0 +1,27 @@
+{{- define "main"}}
+package main
+
+import (
+	"flag"
+	"github.com/expgo/ag/generator"
+{{- range $i, $plugin := .Plugins }}
+    _ "{{$plugin}}"
+{{- end}}
+)
+
+func main() {
+	var filename string
+	var fileSuffix string
+
+	flag.StringVar(&filename, "file", "", "The file is used to generate the annotation file.")
+	flag.StringVar(&fileSuffix, "suffix", "_ag", "Changes the default filename suffix of _ag to something else.")
+
+	flag.Parse()
+
+	if len(filename) == 0 {
+		return
+	}
+
+	generator.GenerateFile(filename, fileSuffix)
+}
+{{end -}}

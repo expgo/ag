@@ -148,7 +148,7 @@ func (ae AnnotationExtend) toApi() *api.AnnotationExtend {
 		Name:    ae.Name.Text,
 		Values:  ae.Values,
 		Value:   ae.Value,
-		Comment: ae.Comment.Text,
+		Comment: toApiComment(ae.Comment),
 	}
 }
 
