@@ -23,10 +23,12 @@ func (p *Plugins) Set(value string) error {
 func main() {
 	var filename string
 	var fileSuffix string
+	var rebuild bool
 	var plugins Plugins
 
 	flag.StringVar(&filename, "file", "", "The file is used to generate the annotation file.")
 	flag.StringVar(&fileSuffix, "file-suffix", "_ag", "Changes the default filename suffix of _ag to something else.")
+	flag.BoolVar(&rebuild, "rebuild", false, "If plugin is used and rebuild is set to true, the plugin program will be rebuild.")
 	flag.Var(&plugins, "plugin", "Add extended plugins to the Annotation Generator.")
 
 	flag.Parse()
@@ -42,7 +44,7 @@ func main() {
 	}
 
 	if len(plugins) > 0 {
-		runPlugins(filename, fileSuffix, plugins)
+		runPlugins(filename, fileSuffix, plugins, rebuild)
 	} else {
 		generator.GenerateFile(filename, fileSuffix)
 	}

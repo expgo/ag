@@ -39,7 +39,7 @@ func getExePath() string {
 	return filepath.Join(filepath.Dir(exeFile), ".ag")
 }
 
-func runPlugins(filename string, fileSuffix string, plugins []string) {
+func runPlugins(filename string, fileSuffix string, plugins []string, rebuild bool) {
 	suffix := getPluginSuffix(plugins)
 
 	pp := &PluginProgram{
@@ -51,7 +51,7 @@ func runPlugins(filename string, fileSuffix string, plugins []string) {
 	pp.exeFile = filepath.Join(pp.baseDir, "ag-"+suffix)
 	pp.exeMainGo = filepath.Join(pp.baseDir, "ag-"+suffix+".go")
 
-	pp.run()
+	pp.run(rebuild)
 }
 
 func (pp *PluginProgram) writeMain() {
@@ -77,26 +77,42 @@ func (pp *PluginProgram) writeMain() {
 }
 
 func (pp *PluginProgram) build() {
+	println("write plugin main.go")
 	pp.writeMain()
+	println("do mod init")
 	pp.runCommand(pp.baseDir, "go", "mod", "init", "main")
+	println("do mod tidy")
 	pp.runCommand(pp.baseDir, "go", "mod", "tidy")
+	println("do mod update")
 	pp.runCommand(pp.baseDir, "go", "get", "-u", ".")
+	println("do mod tidy")
 	pp.runCommand(pp.baseDir, "go", "mod", "tidy")
+	println("build plugin program")
 	pp.runCommand(pp.baseDir, "go", "build", "-o", filepath.Base(pp.exeFile), filepath.Base(pp.exeMainGo))
+	println("remove go files")
 	pp.runCommand(pp.baseDir, "rm", "go.mod", "go.sum", pp.exeMainGo)
 }
 
-func (pp *PluginProgram) run() {
+func (pp *PluginProgram) run(rebuild bool) {
 	// 判断pp.exeFile是否存在
 	_, err := os.Stat(pp.exeFile)
+	build := false
 	if os.IsNotExist(err) {
 		pp.build()
+		build = true
+	}
+
+	if rebuild && !build {
+		pp.runCommand(pp.baseDir, "rm", pp.exeFile)
+		pp.build()
+		build = true
 	}
 
 	workDir, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
+	println("run ag plugin program")
 	pp.runCommand(workDir, pp.exeFile, "-file", pp.filename, "-suffix", pp.fileSuffix)
 }
 
