@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/sha256"
+	"crypto/sha1"
 	"embed"
 	"fmt"
 	"os"
@@ -25,7 +25,7 @@ type PluginProgram struct {
 }
 
 func getPluginSuffix(plugins []string) string {
-	hasher := sha256.New()
+	hasher := sha1.New()
 	hasher.Write([]byte(strings.Join(plugins, ",")))
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
@@ -79,6 +79,8 @@ func (pp *PluginProgram) writeMain() {
 func (pp *PluginProgram) build() {
 	pp.writeMain()
 	pp.runCommand(pp.baseDir, "go", "mod", "init", "main")
+	pp.runCommand(pp.baseDir, "go", "mod", "tidy")
+	pp.runCommand(pp.baseDir, "go", "get", "-u", ".")
 	pp.runCommand(pp.baseDir, "go", "mod", "tidy")
 	pp.runCommand(pp.baseDir, "go", "build", "-o", filepath.Base(pp.exeFile), filepath.Base(pp.exeMainGo))
 	pp.runCommand(pp.baseDir, "rm", "go.mod", "go.sum", pp.exeMainGo)
