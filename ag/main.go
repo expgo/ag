@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/expgo/ag"
+	"github.com/expgo/ag/api"
 	"github.com/expgo/factory"
 	"github.com/expgo/generic/stream"
 	"golang.org/x/tools/imports"
@@ -14,13 +15,13 @@ import (
 	"strings"
 )
 
-func filterTypedAnnotation(typedAnnotations []*ag.TypedAnnotation, annotationMap map[string][]ag.AnnotationType) []*ag.TypedAnnotation {
-	filteredAnnotations := make([]*ag.TypedAnnotation, 0)
+func filterTypedAnnotation(typedAnnotations []*api.TypedAnnotation, annotationMap map[string][]api.AnnotationType) []*api.TypedAnnotation {
+	filteredAnnotations := make([]*api.TypedAnnotation, 0)
 	for _, ta := range typedAnnotations {
 		if ta.Annotations != nil {
 			for name, annotationTypes := range annotationMap {
 				if an := ta.Annotations.FindAnnotationByName(name); an != nil {
-					if stream.Must(stream.Of(annotationTypes).Contains(ta.Type, func(x, y ag.AnnotationType) (bool, error) {
+					if stream.Must(stream.Of(annotationTypes).Contains(ta.Type, func(x, y api.AnnotationType) (bool, error) {
 						return x == y, nil
 					})) {
 						filteredAnnotations = append(filteredAnnotations, ta)
@@ -35,8 +36,8 @@ func filterTypedAnnotation(typedAnnotations []*ag.TypedAnnotation, annotationMap
 
 func GenerateFile(filename string, outputSuffix string) {
 
-	factories := factory.FindInterfaces[ag.GeneratorFactory]()
-	typeMaps := map[ag.AnnotationType]stream.Stream[string]{}
+	factories := factory.FindInterfaces[api.GeneratorFactory]()
+	typeMaps := map[api.AnnotationType]stream.Stream[string]{}
 	for _, f := range factories {
 		annotations := f.Annotations()
 		for name, types := range annotations {
@@ -56,7 +57,7 @@ func GenerateFile(filename string, outputSuffix string) {
 		return
 	}
 
-	gens := []ag.Generator{}
+	gens := []api.Generator{}
 
 	for _, f := range factories {
 		if ftas := filterTypedAnnotation(typedAnnotations, f.Annotations()); len(ftas) > 0 {
@@ -64,7 +65,9 @@ func GenerateFile(filename string, outputSuffix string) {
 			if e != nil {
 				panic(e)
 			}
-			gens = append(gens, gen)
+			if gen != nil {
+				gens = append(gens, gen)
+			}
 		}
 	}
 

@@ -1,13 +1,9 @@
 package ag
 
 import (
-	"errors"
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
-	"github.com/expgo/generic/stream"
-	"github.com/expgo/structure"
-	"reflect"
-	"strings"
+	"github.com/expgo/ag/api"
 	"text/scanner"
 )
 
@@ -30,6 +26,20 @@ type Annotations struct {
 	Annotations []*Annotation `@@*`
 }
 
+func (ans *Annotations) toApi() *api.Annotations {
+	result := &api.Annotations{}
+
+	if len(ans.Annotations) == 0 {
+		return result
+	}
+
+	for _, a := range ans.Annotations {
+		result.Annotations = append(result.Annotations, a.toApi())
+	}
+
+	return result
+}
+
 type ClosedParenthesis struct {
 	Pos               lexer.Position
 	ClosedParenthesis string `")"`
@@ -38,6 +48,20 @@ type ClosedParenthesis struct {
 type Params struct {
 	List              []*AnnotationParam `"(" @@*`
 	ClosedParenthesis ClosedParenthesis  `@@`
+}
+
+func (p *Params) toApi() []*api.AnnotationParam {
+	if len(p.List) == 0 {
+		return nil
+	}
+
+	result := []*api.AnnotationParam{}
+
+	for _, param := range p.List {
+		result = append(result, param.toApi())
+	}
+
+	return result
 }
 
 type ClosedBracket struct {
@@ -50,9 +74,23 @@ type Extends struct {
 	ClosedBracket ClosedBracket       `@@`
 }
 
+func (e Extends) toApi() []*api.AnnotationExtend {
+	if len(e.List) == 0 {
+		return nil
+	}
+
+	result := []*api.AnnotationExtend{}
+
+	for _, extend := range e.List {
+		result = append(result, extend.toApi())
+	}
+
+	return result
+}
+
 type Annotation struct {
 	BeforeUseless *string    `(~(Comment | "@"))*`
-	Comments      []*Comment `@@*`
+	Doc           []*Comment `@@*`
 	Name          Name       `"@" @@`
 	Params        *Params    `@@?`
 	Extends       *Extends   `@@?`
@@ -60,96 +98,101 @@ type Annotation struct {
 	AfterUseless  *string    `(~(Comment | "@"))*`
 }
 
+func (a *Annotation) toApi() *api.Annotation {
+	result := &api.Annotation{
+		Doc:     toApiDoc(a.Doc),
+		Name:    a.Name.Text,
+		Comment: toApiComment(a.Comment),
+	}
+
+	if a.Params != nil {
+		result.Params = a.Params.toApi()
+	}
+
+	if a.Extends != nil {
+		result.Extends = a.Extends.toApi()
+	}
+
+	return result
+}
+
 type AnnotationParam struct {
-	Pos      lexer.Position
-	Comments []*Comment `@@*`
-	Key      Key        `@@`
-	Value    Value      `@@? ","?`
-	Comment  *Comment   `@@?`
+	Pos     lexer.Position
+	Doc     []*Comment `@@*`
+	Key     Key        `@@`
+	Value   api.Value  `@@? ","?`
+	Comment *Comment   `@@?`
+}
+
+func (ap *AnnotationParam) toApi() *api.AnnotationParam {
+	return &api.AnnotationParam{
+		Doc:     toApiDoc(ap.Doc),
+		Key:     ap.Key.Text,
+		Value:   ap.Value,
+		Comment: toApiComment(ap.Comment),
+	}
 }
 
 type AnnotationExtend struct {
-	Pos      lexer.Position
-	Comments []*Comment `@@*`
-	Name     Name       `@@`
-	Values   []Value    `("(" @@* ")")?`
-	Value    Value      `("=" @@)? ","?`
-	Comment  *Comment   `@@?`
+	Pos     lexer.Position
+	Doc     []*Comment  `@@*`
+	Name    Name        `@@`
+	Values  []api.Value `("(" @@* ")")?`
+	Value   api.Value   `("=" @@)? ","?`
+	Comment *Comment    `@@?`
 }
 
-type Value interface{ Value() any }
-
-type Float struct {
-	V float64 `@Float ","? `
+func (ae AnnotationExtend) toApi() *api.AnnotationExtend {
+	return &api.AnnotationExtend{
+		Doc:     toApiDoc(ae.Doc),
+		Name:    ae.Name.Text,
+		Values:  ae.Values,
+		Value:   ae.Value,
+		Comment: ae.Comment.Text,
+	}
 }
 
-func (f Float) Value() any { return f.V }
+func toApiDoc(comments []*Comment) []string {
+	if len(comments) == 0 {
+		return nil
+	}
 
-type Int struct {
-	V int `@(("-" | "+")? Int) ","? `
+	result := []string{}
+
+	for _, comment := range comments {
+		result = append(result, comment.Text)
+	}
+
+	return result
 }
 
-func (i Int) Value() any {
-	return i.V
+func toApiComment(comment *Comment) string {
+	if comment == nil {
+		return ""
+	}
+	return comment.Text
 }
-
-type Uint struct {
-	V uint `@Int ","? `
-}
-
-func (u Uint) Value() any {
-	return u.V
-}
-
-type String struct {
-	V string `@(String | Ident) ","? `
-}
-
-func (s String) Value() any {
-	return s.V
-}
-
-type Boolean bool
-
-func (b *Boolean) Capture(values []string) error {
-	*b = values[0] == "true"
-	return nil
-}
-
-type Bool struct {
-	V Boolean `@("true" | "false") ","? `
-}
-
-func (b Bool) Value() any {
-	return bool(b.V)
-}
-
-//type Unknown struct {
-//	V string `@Ident ","? `
-//}
-//
-//func (u Unknown) Value() {}
 
 var annotationParser = participle.MustBuild[Annotations](
 	participle.Lexer(lexer.NewTextScannerLexer(func(s *scanner.Scanner) {
 		s.Mode &^= scanner.SkipComments
 	})),
-	participle.Union[Value](Bool{}, Float{}, Int{}, Uint{}, String{}),
+	participle.Union[api.Value](api.Bool{}, api.Float{}, api.Int{}, api.Uint{}, api.String{}),
 	participle.Unquote("String"),
 )
 
-func fixComments(annotationGroup *Annotations, err error) (*Annotations, error) {
+func fixComments(annotations *Annotations, err error) (*api.Annotations, error) {
 	if err != nil {
-		return annotationGroup, err
+		return nil, err
 	}
 
-	for ai, annotation := range annotationGroup.Annotations {
+	for ai, annotation := range annotations.Annotations {
 		if annotation.Params != nil {
 			for pi, param := range annotation.Params.List {
 				if param.Comment != nil &&
 					param.Comment.Pos.Line != param.Key.Pos.Line &&
 					pi+1 < len(annotation.Params.List) {
-					annotation.Params.List[pi+1].Comments = append([]*Comment{param.Comment}, annotation.Params.List[pi+1].Comments...)
+					annotation.Params.List[pi+1].Doc = append([]*Comment{param.Comment}, annotation.Params.List[pi+1].Doc...)
 					param.Comment = nil
 				}
 			}
@@ -160,7 +203,7 @@ func fixComments(annotationGroup *Annotations, err error) (*Annotations, error) 
 				if extend.Comment != nil &&
 					extend.Comment.Pos.Line != extend.Name.Pos.Line &&
 					ei+1 < len(annotation.Extends.List) {
-					annotation.Extends.List[ei+1].Comments = append([]*Comment{extend.Comment}, annotation.Extends.List[ei+1].Comments...)
+					annotation.Extends.List[ei+1].Doc = append([]*Comment{extend.Comment}, annotation.Extends.List[ei+1].Doc...)
 					extend.Comment = nil
 				}
 			}
@@ -170,91 +213,15 @@ func fixComments(annotationGroup *Annotations, err error) (*Annotations, error) 
 			!(annotation.Comment.Pos.Line == annotation.Name.Pos.Line ||
 				(annotation.Params != nil && annotation.Params.ClosedParenthesis.Pos.Line == annotation.Comment.Pos.Line) ||
 				(annotation.Extends != nil && annotation.Extends.ClosedBracket.Pos.Line == annotation.Comment.Pos.Line)) &&
-			ai+1 < len(annotationGroup.Annotations) {
-			annotationGroup.Annotations[ai+1].Comments = append([]*Comment{annotation.Comment}, annotationGroup.Annotations[ai+1].Comments...)
+			ai+1 < len(annotations.Annotations) {
+			annotations.Annotations[ai+1].Doc = append([]*Comment{annotation.Comment}, annotations.Annotations[ai+1].Doc...)
 			annotation.Comment = nil
 		}
 	}
 
-	return annotationGroup, err
+	return annotations.toApi(), err
 }
 
-var defaultBoolValue = any(Bool{V: true}).(Value)
-
-func (a *Annotation) To(t any) (err error) {
-	if t == nil {
-		return errors.New("the input parameter cannot be nil")
-	}
-
-	if a.Params != nil {
-		err = structure.WalkField(t, func(fieldValue reflect.Value, structField reflect.StructField, rootValues []reflect.Value) error {
-			switch fieldValue.Kind() {
-			case reflect.Ptr, reflect.Struct:
-				return nil
-			default:
-			}
-
-			var ap *AnnotationParam = nil
-
-			for _, p := range a.Params.List {
-				if strings.EqualFold(structField.Name, p.Key.Text) {
-					ap = p
-					break
-				}
-			}
-
-			if ap == nil {
-				return nil
-			}
-
-			if fieldValue.Kind() == reflect.Bool && ap.Value == nil {
-				ap.Value = defaultBoolValue
-			}
-
-			if ap.Value != nil {
-				value := structure.MustConvertToType(ap.Value.Value(), fieldValue.Type())
-				if structure.SetFieldBySetMethod(fieldValue, value, structField, rootValues[len(rootValues)-1]) {
-					return nil
-				}
-				return structure.SetField(fieldValue, value)
-			}
-
-			return nil
-		})
-	}
-
-	return
-}
-
-func (anns *Annotations) FindAnnotationByName(name string) *Annotation {
-	if len(anns.Annotations) > 0 {
-		for _, a := range anns.Annotations {
-			if strings.EqualFold(a.Name.Text, name) {
-				return a
-			}
-		}
-	}
-
-	return nil
-}
-
-func ParseAnnotation(fileName string, text string) (*Annotations, error) {
+func ParseAnnotation(fileName string, text string) (*api.Annotations, error) {
 	return fixComments(annotationParser.ParseString(fileName, text))
-}
-
-func GetCommentsText(comments []*Comment) string {
-	if len(comments) == 0 {
-		return ""
-	}
-
-	return strings.Join(stream.Must(stream.Map[*Comment, string](stream.Of(comments), func(comment *Comment) (string, error) {
-		return comment.Text, nil
-	}).ToSlice()), "\n")
-}
-
-func GetCommentText(comment *Comment) string {
-	if comment == nil {
-		return ""
-	}
-	return comment.Text
 }

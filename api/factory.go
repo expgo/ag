@@ -1,8 +1,10 @@
-package ag
+package api
 
-import "go/ast"
+import (
+	"go/ast"
+)
 
-//go:generate enum
+//go:generate ag
 
 /*
 	@Enum {

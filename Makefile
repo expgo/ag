@@ -1,8 +1,6 @@
 
-.PHONY: install, test
+.PHONY: install
 
 install:
-	go install
+	go install ./ag
 
-test:
-	go generate ./...

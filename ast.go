@@ -2,6 +2,7 @@ package ag
 
 import (
 	"fmt"
+	"github.com/expgo/ag/api"
 	"github.com/expgo/generic/stream"
 	"go/ast"
 	"go/parser"
@@ -20,7 +21,7 @@ func parseFile(inputFile string) (*ast.File, *token.FileSet, error) {
 	return fileNode, fileSet, nil
 }
 
-func getAnnotations(parseName string, names stream.Stream[string], comments string) (*Annotations, error) {
+func getAnnotations(parseName string, names stream.Stream[string], comments string) (*api.Annotations, error) {
 	if stream.Must(names.AnyMatch(func(s string) (bool, error) { return strings.Contains(comments, "@"+s), nil })) {
 		ag, err := ParseAnnotation(parseName, comments)
 		if err != nil {
@@ -57,11 +58,11 @@ func getRecvType(fd *ast.FuncDecl) *ast.TypeSpec {
 	return nil
 }
 
-func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[AnnotationType]stream.Stream[string]) (result []*TypedAnnotation, e error) {
+func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.AnnotationType]stream.Stream[string]) (result []*api.TypedAnnotation, e error) {
 	ast.Inspect(fileNode, func(n ast.Node) bool {
 		switch decl := n.(type) {
 		case *ast.TypeSpec:
-			if names, ok := typeMaps[AnnotationTypeType]; ok {
+			if names, ok := typeMaps[api.AnnotationTypeType]; ok {
 				if decl.Doc == nil {
 					decl.Doc = FindDocLocationCommentGroup(fileNode, fileSet, decl.Pos())
 				}
@@ -83,7 +84,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[Annota
 				}
 
 				if annotations != nil {
-					result = append(result, &TypedAnnotation{AnnotationTypeType, decl, annotations, nil})
+					result = append(result, &api.TypedAnnotation{api.AnnotationTypeType, decl, annotations, nil})
 				}
 			}
 		case *ast.FuncDecl:
@@ -96,16 +97,16 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[Annota
 				comment = decl.Doc.Text()
 			}
 
-			var annotations *Annotations
-			if names, ok := typeMaps[AnnotationTypeFunc]; ok {
+			var annotations *api.Annotations
+			if names, ok := typeMaps[api.AnnotationTypeFunc]; ok {
 				annotations, e = getAnnotations(decl.Name.Name, names, comment)
 				if e != nil {
 					return false
 				}
 			}
-			funcAnnotation := &TypedAnnotation{AnnotationTypeFunc, decl, annotations, nil}
+			funcAnnotation := &api.TypedAnnotation{api.AnnotationTypeFunc, decl, annotations, nil}
 
-			if names, ok := typeMaps[AnnotationTypeFuncRecv]; ok {
+			if names, ok := typeMaps[api.AnnotationTypeFuncRecv]; ok {
 				if decl.Recv != nil {
 					recvType := getRecvType(decl)
 					if recvType != nil {
@@ -129,13 +130,13 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[Annota
 							return false
 						}
 						if recvAnnotations != nil {
-							result = append(result, &TypedAnnotation{AnnotationTypeFuncRecv, recvType, recvAnnotations, funcAnnotation})
+							result = append(result, &api.TypedAnnotation{api.AnnotationTypeFuncRecv, recvType, recvAnnotations, funcAnnotation})
 						}
 					}
 				}
 			}
 
-			if names, ok := typeMaps[AnnotationTypeFuncField]; ok {
+			if names, ok := typeMaps[api.AnnotationTypeFuncField]; ok {
 				for _, field := range decl.Type.Params.List {
 					if field.Doc == nil {
 						field.Doc = FindDocLocationCommentGroup(fileNode, fileSet, field.Pos())
@@ -157,7 +158,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[Annota
 						return false
 					}
 					if fieldAnnotations != nil {
-						result = append(result, &TypedAnnotation{AnnotationTypeFuncField, field, fieldAnnotations, funcAnnotation})
+						result = append(result, &api.TypedAnnotation{api.AnnotationTypeFuncField, field, fieldAnnotations, funcAnnotation})
 					}
 				}
 			}
@@ -173,7 +174,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[Annota
 	return
 }
 
-func ParseFile(filename string, typeMaps map[AnnotationType]stream.Stream[string]) (result []*TypedAnnotation, packageName string, e error) {
+func ParseFile(filename string, typeMaps map[api.AnnotationType]stream.Stream[string]) (result []*api.TypedAnnotation, packageName string, e error) {
 	filename, _ = filepath.Abs(filename)
 
 	fileNode, fileSet, err := parseFile(filename)
@@ -184,7 +185,7 @@ func ParseFile(filename string, typeMaps map[AnnotationType]stream.Stream[string
 	packageName = fileNode.Name.Name
 
 	// global TypedAnnotation
-	if names, ok := typeMaps[AnnotationTypeGlobal]; ok {
+	if names, ok := typeMaps[api.AnnotationTypeGlobal]; ok {
 		for _, cg := range fileNode.Comments {
 			if strings.HasPrefix(cg.List[len(cg.List)-1].Text, "//go:generate") {
 				annotations, err := getAnnotations(fileNode.Name.Name, names, cg.Text())
@@ -192,7 +193,7 @@ func ParseFile(filename string, typeMaps map[AnnotationType]stream.Stream[string
 					return nil, "", err
 				}
 				if annotations != nil {
-					result = append(result, &TypedAnnotation{AnnotationTypeGlobal, nil, annotations, nil})
+					result = append(result, &api.TypedAnnotation{api.AnnotationTypeGlobal, nil, annotations, nil})
 				}
 			}
 		}
