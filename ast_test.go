@@ -1,7 +1,6 @@
 package ag
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -108,19 +107,19 @@ func abc(){}
 	fset := token.NewFileSet()
 
 	// 解析源码以获得AST
-	file, err := parser.ParseFile(fset, "", src, parser.ParseComments)
+	_, err := parser.ParseFile(fset, "", src, parser.ParseComments)
 	//file, err := ast.ParseFile(fset, "./annotation.go", nil, ast.ParseComments)
 	if err != nil {
 		panic(err)
 	}
 
-	InspectMapper[ast.TypeSpec, any](file, fset, func(x *ast.TypeSpec) *any {
-		fmt.Printf("InspectMapper.TypeSpec: %#v\n", x)
-		return nil
-	})
-
-	InspectMapper[ast.FuncDecl, any](file, fset, func(x *ast.FuncDecl) *any {
-		fmt.Printf("InspectMapper.FuncDecl: %#v\n", x)
-		return nil
-	})
+	//InspectMapper[ast.TypeSpec, any](file, fset, func(x *ast.TypeSpec) *any {
+	//	fmt.Printf("InspectMapper.TypeSpec: %#v\n", x)
+	//	return nil
+	//})
+	//
+	//InspectMapper[ast.FuncDecl, any](file, fset, func(x *ast.FuncDecl) *any {
+	//	fmt.Printf("InspectMapper.FuncDecl: %#v\n", x)
+	//	return nil
+	//})
 }

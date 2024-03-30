@@ -74,6 +74,11 @@ func GenerateFile(filename string, outputSuffix string) {
 		}
 	}
 
+	if len(gens) == 0 {
+		println("No annotation found.")
+		return
+	}
+
 	if len(gens) > 0 {
 		buf := bytes.NewBuffer([]byte{})
 
@@ -146,5 +151,6 @@ func GenerateFile(filename string, outputSuffix string) {
 		if err != nil {
 			panic(fmt.Errorf("failed writing to file %s: %s", outFilePath, err))
 		}
+		println("Finish write : " + outFilePath)
 	}
 }

@@ -26,12 +26,14 @@ func main() {
 	var rebuild bool
 	var plugins Plugins
 	var devPlugin string
+	var devPluginDir string
 
 	flag.StringVar(&filename, "file", "", "The file is used to generate the annotation file.")
 	flag.StringVar(&fileSuffix, "file-suffix", "_ag", "Changes the default filename suffix of _ag to something else.")
 	flag.BoolVar(&rebuild, "rebuild", false, "If plugin is used and rebuild is set to true, the plugin program will be rebuild.")
 	flag.Var(&plugins, "plugin", "Add extended plugins to the Annotation Generator.")
 	flag.StringVar(&devPlugin, "dev-plugin", "", "Used when develop ag plugin.")
+	flag.StringVar(&devPluginDir, "dev-plugin-dir", ".", "Used when develop ag plugin, the dir is the replace path.")
 
 	flag.Parse()
 
@@ -46,7 +48,7 @@ func main() {
 	}
 
 	if len(plugins) > 0 || len(devPlugin) > 0 {
-		runPlugins(filename, fileSuffix, plugins, devPlugin, rebuild)
+		runPlugins(filename, fileSuffix, plugins, rebuild, devPlugin, devPluginDir)
 	} else {
 		generator.GenerateFile(filename, fileSuffix)
 	}

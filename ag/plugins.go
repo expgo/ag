@@ -33,9 +33,10 @@ type PluginProgram struct {
 	Plugins []string
 	baseDir string
 	// -------------
-	devPlugin string
-	rebuild   bool
-	devMode   bool
+	devPlugin    string
+	devPluginDir string
+	rebuild      bool
+	devMode      bool
 	// -------------
 	filename   string
 	fileSuffix string
@@ -56,13 +57,14 @@ func getExePath() string {
 	return filepath.Join(filepath.Dir(exeFile), ".ag")
 }
 
-func runPlugins(filename string, fileSuffix string, plugins []string, devPlugin string, rebuild bool) {
+func runPlugins(filename string, fileSuffix string, plugins []string, rebuild bool, devPlugin string, devPluginDir string) {
 	pp := &PluginProgram{
-		Plugins:    plugins,
-		devPlugin:  devPlugin,
-		rebuild:    rebuild,
-		filename:   filename,
-		fileSuffix: fileSuffix,
+		Plugins:      plugins,
+		devPlugin:    devPlugin,
+		devPluginDir: devPluginDir,
+		rebuild:      rebuild,
+		filename:     filename,
+		fileSuffix:   fileSuffix,
 	}
 
 	if len(devPlugin) > 0 {
@@ -118,7 +120,11 @@ func (pp *PluginProgram) build() {
 			if err != nil {
 				panic(err)
 			}
-			pp.runCommand(pp.baseDir, "echo", fmt.Sprintf("replace %s => %s", pp.devPlugin, workDir), ">>", AGFileGoMod.Val())
+			absWorkDir, err := filepath.Abs(filepath.Join(workDir, pp.devPluginDir))
+			if err != nil {
+				panic(err)
+			}
+			pp.runCommand(pp.baseDir, "bash", "-c", fmt.Sprintf(`echo "replace %s => %s" >> %s`, pp.devPlugin, absWorkDir, AGFileGoMod.Val()))
 		}
 
 		println("do mod tidy")
@@ -161,19 +167,19 @@ func (pp *PluginProgram) run() {
 	if err != nil {
 		panic(err)
 	}
-	println("run ag plugin program")
+	println("run ag plugin program, workDir: ", workDir)
 	pp.runCommand(workDir, agExe, "-file", pp.filename, "-suffix", pp.fileSuffix)
 }
 
 func (pp *PluginProgram) runCommand(workDir string, name string, arg ...string) {
 	cmd := exec.Command(name, arg...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	if len(workDir) > 0 {
 		cmd.Dir = workDir
 	}
 
-	// 执行命令并获取输出
-	output, err := cmd.Output()
-	println(string(output))
+	err := cmd.Run()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			println(string(exitErr.Stderr))
