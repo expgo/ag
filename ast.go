@@ -22,7 +22,8 @@ func parseFile(inputFile string) (*ast.File, *token.FileSet, error) {
 }
 
 func getAnnotations(parseName string, names stream.Stream[string], comments string) (*api.Annotations, error) {
-	if stream.Must(names.AnyMatch(func(s string) (bool, error) { return strings.Contains(comments, "@"+s), nil })) {
+	lowComments := strings.ToLower(comments)
+	if stream.Must(names.AnyMatch(func(s string) (bool, error) { return strings.Contains(lowComments, "@"+strings.ToLower(s)), nil })) {
 		ag, err := ParseAnnotation(parseName, comments)
 		if err != nil {
 			return nil, fmt.Errorf("parse annotation err: %v", err)
