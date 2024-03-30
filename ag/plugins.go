@@ -14,17 +14,34 @@ import (
 //go:embed main.tmpl
 var mainTmpl embed.FS
 
+//go:generate ag
+/*
+	@Enum {
+		Exe = "ag"
+		MainGo = "main.go"
+		GoMod = "go.mod"
+		GoSum = "go.sum"
+	}
+*/
+type AGFile string
+
+func (x AGFile) GetFilePath(baseDir string) string {
+	return filepath.Join(baseDir, x.Val())
+}
+
 type PluginProgram struct {
-	Plugins   []string
-	baseDir   string
-	exeFile   string
-	exeMainGo string
+	Plugins []string
+	baseDir string
+	// -------------
+	devPlugin string
+	rebuild   bool
+	devMode   bool
 	// -------------
 	filename   string
 	fileSuffix string
 }
 
-func getPluginSuffix(plugins []string) string {
+func getPathHash(plugins []string) string {
 	hasher := sha1.New()
 	hasher.Write([]byte(strings.Join(plugins, ",")))
 	return fmt.Sprintf("%x", hasher.Sum(nil))
@@ -39,19 +56,24 @@ func getExePath() string {
 	return filepath.Join(filepath.Dir(exeFile), ".ag")
 }
 
-func runPlugins(filename string, fileSuffix string, plugins []string, rebuild bool) {
-	suffix := getPluginSuffix(plugins)
-
+func runPlugins(filename string, fileSuffix string, plugins []string, devPlugin string, rebuild bool) {
 	pp := &PluginProgram{
 		Plugins:    plugins,
-		baseDir:    getExePath(),
+		devPlugin:  devPlugin,
+		rebuild:    rebuild,
 		filename:   filename,
 		fileSuffix: fileSuffix,
 	}
-	pp.exeFile = filepath.Join(pp.baseDir, "ag-"+suffix)
-	pp.exeMainGo = filepath.Join(pp.baseDir, "ag-"+suffix+".go")
 
-	pp.run(rebuild)
+	if len(devPlugin) > 0 {
+		pp.Plugins = append(pp.Plugins, devPlugin)
+	}
+
+	hash := getPathHash(plugins)
+	pp.baseDir = filepath.Join(getExePath(), hash)
+	pp.devMode = len(pp.devPlugin) > 0
+
+	pp.run()
 }
 
 func (pp *PluginProgram) writeMain() {
@@ -64,7 +86,7 @@ func (pp *PluginProgram) writeMain() {
 	tmpl = tmpl.Lookup("main")
 
 	var mainFile *os.File
-	mainFile, err := os.Create(pp.exeMainGo)
+	mainFile, err := os.Create(AGFileMainGo.GetFilePath(pp.baseDir))
 	if err != nil {
 		panic(err)
 	}
@@ -77,33 +99,60 @@ func (pp *PluginProgram) writeMain() {
 }
 
 func (pp *PluginProgram) build() {
-	println("write plugin main.go")
-	pp.writeMain()
-	println("do mod init")
-	pp.runCommand(pp.baseDir, "go", "mod", "init", "main")
-	println("do mod tidy")
-	pp.runCommand(pp.baseDir, "go", "mod", "tidy")
-	println("do mod update")
-	pp.runCommand(pp.baseDir, "go", "get", "-u", ".")
-	println("do mod tidy")
-	pp.runCommand(pp.baseDir, "go", "mod", "tidy")
+	newCreate := false
+
+	_, err := os.Stat(AGFileMainGo.GetFilePath(pp.baseDir))
+	if os.IsNotExist(err) {
+		println("write plugin main.go")
+		pp.writeMain()
+		newCreate = true
+	}
+
+	if newCreate {
+		println("do mod init")
+		pp.runCommand(pp.baseDir, "go", "mod", "init", "main")
+
+		if pp.devMode {
+			// write replace to go.mod
+			workDir, err := os.Getwd()
+			if err != nil {
+				panic(err)
+			}
+			pp.runCommand(pp.baseDir, "echo", fmt.Sprintf("replace %s => %s", pp.devPlugin, workDir), ">>", AGFileGoMod.Val())
+		}
+
+		println("do mod tidy")
+		pp.runCommand(pp.baseDir, "go", "mod", "tidy")
+		println("do mod update")
+		pp.runCommand(pp.baseDir, "go", "get", "-u", ".")
+	}
+
+	if newCreate || pp.devMode {
+		println("do mod tidy")
+		pp.runCommand(pp.baseDir, "go", "mod", "tidy")
+	}
+
 	println("build plugin program")
-	pp.runCommand(pp.baseDir, "go", "build", "-o", filepath.Base(pp.exeFile), filepath.Base(pp.exeMainGo))
-	println("remove go files")
-	pp.runCommand(pp.baseDir, "rm", "go.mod", "go.sum", pp.exeMainGo)
+	pp.runCommand(pp.baseDir, "go", "build", "-o", AGFileExe.Val(), AGFileMainGo.Val())
+
+	if !pp.devMode {
+		println("remove go files")
+		pp.runCommand(pp.baseDir, "rm", AGFileGoMod.Val(), AGFileGoSum.Val(), AGFileMainGo.Val())
+	}
 }
 
-func (pp *PluginProgram) run(rebuild bool) {
+func (pp *PluginProgram) run() {
 	// 判断pp.exeFile是否存在
-	_, err := os.Stat(pp.exeFile)
+	agExe := AGFileExe.GetFilePath(pp.baseDir)
+	_, err := os.Stat(agExe)
 	build := false
 	if os.IsNotExist(err) {
 		pp.build()
 		build = true
 	}
 
-	if rebuild && !build {
-		pp.runCommand(pp.baseDir, "rm", pp.exeFile)
+	if !build && (pp.rebuild || pp.devMode) {
+		pp.runCommand(pp.baseDir, "rm", agExe)
 		pp.build()
 		build = true
 	}
@@ -113,7 +162,7 @@ func (pp *PluginProgram) run(rebuild bool) {
 		panic(err)
 	}
 	println("run ag plugin program")
-	pp.runCommand(workDir, pp.exeFile, "-file", pp.filename, "-suffix", pp.fileSuffix)
+	pp.runCommand(workDir, agExe, "-file", pp.filename, "-suffix", pp.fileSuffix)
 }
 
 func (pp *PluginProgram) runCommand(workDir string, name string, arg ...string) {
