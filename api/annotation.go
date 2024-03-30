@@ -81,6 +81,14 @@ func (b Bool) Value() any {
 	return bool(b.V)
 }
 
+type Slice struct {
+	V []Value `"{" @@* "}"`
+}
+
+func (s Slice) Value() any {
+	return s.V
+}
+
 var defaultBoolValue = any(Bool{V: true}).(Value)
 
 func (a *Annotation) To(t any) (err error) {

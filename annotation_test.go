@@ -14,31 +14,31 @@ func TestParseAnnotation(t *testing.T) {
 		name     string
 		fileName string
 		text     string
-		want     *Annotations
+		want     *api.Annotations
 		wantErr  bool
 	}{
 		{
 			name:     "Empty file name and text",
 			fileName: "",
 			text:     "",
-			want:     &Annotations{},
+			want:     &api.Annotations{},
 			wantErr:  false,
 		},
 		{
 			name:     "Valid file name but empty text",
 			fileName: "file.go",
 			text:     "",
-			want:     &Annotations{},
+			want:     &api.Annotations{},
 			wantErr:  false,
 		},
 		{
 			name:     "only one annotation name",
 			fileName: "file.go",
 			text:     "@tag",
-			want: &Annotations{
-				Annotations: []*Annotation{
+			want: &api.Annotations{
+				Annotations: []*api.Annotation{
 					{
-						Name: Name{Text: "tag"},
+						Name: "tag",
 					},
 				},
 			},
@@ -51,13 +51,13 @@ func TestParseAnnotation(t *testing.T) {
 @tag
 @sql
 `,
-			want: &Annotations{
-				Annotations: []*Annotation{
+			want: &api.Annotations{
+				Annotations: []*api.Annotation{
 					{
-						Name: Name{Text: "tag"},
+						Name: "tag",
 					},
 					{
-						Name: Name{Text: "sql"},
+						Name: "sql",
 					},
 				},
 			},
@@ -88,35 +88,27 @@ sql comment2
 @sql
 some real sql comment
 `,
-			want: &Annotations{
-				Annotations: []*Annotation{
+			want: &api.Annotations{
+				Annotations: []*api.Annotation{
 					{
-						Doc: []*Comment{
-							{
-								Text: "// tag comment 1",
-							},
-							{
-								Text: `/* tag comment 2
+						Doc: []string{
+							"// tag comment 1",
+							`/* tag comment 2
    tag comment 3
    tag comment 4
 */`,
-							},
 						},
-						Name:    Name{Text: "tag"},
-						Comment: &Comment{Text: "// tag inline comment"},
+						Name:    "tag",
+						Comment: "// tag inline comment",
 					},
 					{
-						Doc: []*Comment{
-							{
-								Text: `/* sql comment 1
+						Doc: []string{
+							`/* sql comment 1
 sql comment2
 */`,
-							},
-							{
-								Text: "// sql comment 3",
-							},
+							"// sql comment 3",
 						},
-						Name: Name{Text: "sql"},
+						Name: "sql",
 					},
 				},
 			},
@@ -126,52 +118,54 @@ sql comment2
 			name:     "two annotation with params",
 			fileName: "file.go",
 			text: `
-@tag(disable, string = "str\"ing" , int=123, double=456.7, bool = true)
+@tag(disable, string = "str\"ing" , int=123, double=456.7, bool = true, params = { "abc", 321, 123.4, false})
 @sql(code int32, name string, message=string)
 `,
-			want: &Annotations{
-				Annotations: []*Annotation{
+			want: &api.Annotations{
+				Annotations: []*api.Annotation{
 					{
-						Name: Name{Text: "tag"},
-						Params: &Params{List: []*AnnotationParam{
+						Name: "tag",
+						Params: []*api.AnnotationParam{
 							{
-								Key: Key{Text: "disable"},
+								Key: "disable",
 							},
 							{
-								Key:   Key{Text: "string"},
-								Value: any(api.String{V: "str\"ing"}).(api.Value),
+								Key:   "string",
+								Value: api.String{V: "str\"ing"},
 							},
 							{
-								Key:   Key{Text: "int"},
-								Value: any(api.Int{V: 123}).(api.Value),
+								Key:   "int",
+								Value: api.Int{V: 123},
 							},
 							{
-								Key:   Key{Text: "double"},
-								Value: any(api.Float{V: 456.7}).(api.Value),
+								Key:   "double",
+								Value: api.Float{V: 456.7},
 							},
 							{
-								Key:   Key{Text: "bool"},
-								Value: any(api.Bool{V: true}).(api.Value),
+								Key:   "bool",
+								Value: api.Bool{V: true},
 							},
-						},
+							{
+								Key:   "params",
+								Value: api.Slice{V: []api.Value{api.String{V: "abc"}, api.Int{V: 321}, api.Float{V: 123.4}, api.Bool{V: false}}},
+							},
 						},
 					},
 					{
-						Name: Name{Text: "sql"},
-						Params: &Params{List: []*AnnotationParam{
+						Name: "sql",
+						Params: []*api.AnnotationParam{
 							{
-								Key:   Key{Text: "code"},
-								Value: any(api.String{V: "int32"}).(api.Value),
+								Key:   "code",
+								Value: api.String{V: "int32"},
 							},
 							{
-								Key:   Key{Text: "name"},
-								Value: any(api.String{V: "string"}).(api.Value),
+								Key:   "name",
+								Value: api.String{V: "string"},
 							},
 							{
-								Key:   Key{Text: "message"},
-								Value: any(api.String{V: "string"}).(api.Value),
+								Key:   "message",
+								Value: api.String{V: "string"},
 							},
-						},
 						},
 					},
 				},
@@ -191,84 +185,81 @@ sql comment2
 }
 @sql(code int32, name string, message=string)
 `,
-			want: &Annotations{
-				Annotations: []*Annotation{
+			want: &api.Annotations{
+				Annotations: []*api.Annotation{
 					{
-						Name: Name{Text: "tag"},
-						Params: &Params{List: []*AnnotationParam{
+						Name: "tag",
+						Params: []*api.AnnotationParam{
 							{
-								Key: Key{Text: "disable"},
+								Key: "disable",
 							},
 							{
-								Key:   Key{Text: "string"},
-								Value: any(api.String{V: "str\"ing"}).(api.Value),
+								Key:   "string",
+								Value: api.String{V: "str\"ing"},
 							},
 							{
-								Key:   Key{Text: "int"},
-								Value: any(api.Int{V: 123}).(api.Value),
+								Key:   "int",
+								Value: api.Int{V: 123},
 							},
 							{
-								Key:   Key{Text: "double"},
-								Value: any(api.Float{V: 456.7}).(api.Value),
+								Key:   "double",
+								Value: api.Float{V: 456.7},
 							},
 							{
-								Key:   Key{Text: "bool"},
-								Value: any(api.Bool{V: true}).(api.Value),
+								Key:   "bool",
+								Value: api.Bool{V: true},
 							},
 						},
-						},
-						Extends: &Extends{List: []*AnnotationExtend{
+						Extends: []*api.AnnotationExtend{
 							{
-								Name: Name{Text: "Good"},
+								Name: "Good",
 							},
 							{
-								Name:  Name{Text: "GoodWithIntValue"},
-								Value: any(api.Int{V: 12}).(api.Value),
+								Name:  "GoodWithIntValue",
+								Value: api.Int{V: 12},
 							},
 							{
-								Name:  Name{Text: "GoodWithStrValue"},
-								Value: any(api.String{V: "str"}).(api.Value),
+								Name:  "GoodWithStrValue",
+								Value: api.String{V: "str"},
 							},
 							{
-								Name: Name{Text: "GoodWithParams"},
+								Name: "GoodWithParams",
 								Values: []api.Value{
-									any(api.String{V: "string"}).(api.Value),
-									any(api.Int{V: 123}).(api.Value),
-									any(api.Float{V: 456.7}).(api.Value),
-									any(api.Bool{V: true}).(api.Value),
+									api.String{V: "string"},
+									api.Int{V: 123},
+									api.Float{V: 456.7},
+									api.Bool{V: true},
 								},
-								Comment: &Comment{Text: singleComment},
+								Comment: singleComment,
 							},
 							{
-								Name: Name{Text: "GoodWithAll"},
+								Name: "GoodWithAll",
 								Values: []api.Value{
-									any(api.String{V: "string"}).(api.Value),
-									any(api.Int{V: 123}).(api.Value),
-									any(api.Float{V: 456.7}).(api.Value),
-									any(api.Bool{V: false}).(api.Value),
+									api.String{V: "string"},
+									api.Int{V: 123},
+									api.Float{V: 456.7},
+									api.Bool{V: false},
 								},
-								Value:   any(api.Int{V: 89}).(api.Value),
-								Comment: &Comment{Text: multiComment},
+								Value:   api.Int{V: 89},
+								Comment: multiComment,
 							},
-						},
 						},
 					},
 					{
-						Name: Name{Text: "sql"},
-						Params: &Params{List: []*AnnotationParam{
+						Name: "sql",
+						Params: []*api.AnnotationParam{
 							{
-								Key:   Key{Text: "code"},
-								Value: any(api.String{V: "int32"}).(api.Value),
+								Key:   "code",
+								Value: api.String{V: "int32"},
 							},
 							{
-								Key:   Key{Text: "name"},
-								Value: any(api.String{V: "string"}).(api.Value),
+								Key:   "name",
+								Value: api.String{V: "string"},
 							},
 							{
-								Key:   Key{Text: "message"},
-								Value: any(api.String{V: "string"}).(api.Value),
+								Key:   "message",
+								Value: api.String{V: "string"},
 							},
-						},
 						},
 					},
 				},
@@ -314,134 +305,119 @@ tag comment 4
 */
 @sql(code int32, name string, message=string) // sql inline comment
 `,
-			want: &Annotations{
-				Annotations: []*Annotation{
+			want: &api.Annotations{
+				Annotations: []*api.Annotation{
 					{
-						Doc: []*Comment{
-							{
-								Text: "// tag comment 1",
-							},
-							{
-								Text: "// tag comment 2",
-							},
-							{
-								Text: `/* tag comment 3
+						Doc: []string{
+							"// tag comment 1",
+							"// tag comment 2",
+							`/* tag comment 3
 tag comment 4
 */`,
-							},
 						},
-						Name: Name{Text: "tag"},
-						Params: &Params{List: []*AnnotationParam{
+						Name: "tag",
+						Params: []*api.AnnotationParam{
 							{
-								Doc: []*Comment{
-									{Text: "// upper disable comment"},
+								Doc: []string{
+									"// upper disable comment",
 								},
-								Key:     Key{Text: "disable"},
-								Comment: &Comment{Text: "// disable comment"},
+								Key:     "disable",
+								Comment: "// disable comment",
 							},
 							{
-								Doc: []*Comment{
-									{Text: "// string comment 1"},
-									{Text: "// string comment 2"},
+								Doc: []string{
+									"// string comment 1",
+									"// string comment 2",
 								},
-								Key:   Key{Text: "string"},
-								Value: any(api.String{V: "str\"ing"}).(api.Value),
+								Key:   "string",
+								Value: api.String{V: "str\"ing"},
 							},
 							{
-								Doc: []*Comment{
-									{Text: `/* int comment 1
+								Doc: []string{
+									`/* int comment 1
        int comment 2
-    */`},
+    */`,
 								},
-								Key:   Key{Text: "int"},
-								Value: any(api.Int{V: 123}).(api.Value),
+								Key:   "int",
+								Value: api.Int{V: 123},
 							},
 							{
-								Key:     Key{Text: "double"},
-								Value:   any(api.Float{V: 456.7}).(api.Value),
-								Comment: &Comment{Text: "// double inline comment"},
+								Key:     "double",
+								Value:   api.Float{V: 456.7},
+								Comment: "// double inline comment",
 							},
 							{
-								Key:   Key{Text: "bool"},
-								Value: any(api.Bool{V: true}).(api.Value),
+								Key:   "bool",
+								Value: api.Bool{V: true},
 							},
 						},
-						},
-						Extends: &Extends{List: []*AnnotationExtend{
+						Extends: []*api.AnnotationExtend{
 							{
-								Doc: []*Comment{
-									{Text: "// comment 1"},
-									{Text: "// comment 2"},
+								Doc: []string{
+									"// comment 1",
+									"// comment 2",
 								},
-								Name: Name{Text: "Good"},
+								Name: "Good",
 							},
 							{
-								Doc: []*Comment{
-									{Text: `/* comment 1
+								Doc: []string{
+									`/* comment 1
        comment 2
-       comment 3 */`},
+       comment 3 */`,
 								},
-								Name:  Name{Text: "GoodWithIntValue"},
-								Value: any(api.Int{V: 12}).(api.Value),
+								Name:  "GoodWithIntValue",
+								Value: api.Int{V: 12},
 							},
 							{
-								Name:  Name{Text: "GoodWithStrValue"},
-								Value: any(api.String{V: "str"}).(api.Value),
+								Name:  "GoodWithStrValue",
+								Value: api.String{V: "str"},
 							},
 							{
-								Name: Name{Text: "GoodWithParams"},
+								Name: "GoodWithParams",
 								Values: []api.Value{
-									any(api.String{V: "string"}).(api.Value),
-									any(api.Int{V: 123}).(api.Value),
-									any(api.Float{V: 456.7}).(api.Value),
-									any(api.Bool{V: true}).(api.Value),
+									api.String{V: "string"},
+									api.Int{V: 123},
+									api.Float{V: 456.7},
+									api.Bool{V: true},
 								},
-								Comment: &Comment{Text: singleComment},
+								Comment: singleComment,
 							},
 							{
-								Name: Name{Text: "GoodWithAll"},
+								Name: "GoodWithAll",
 								Values: []api.Value{
-									any(api.String{V: "string"}).(api.Value),
-									any(api.Int{V: 123}).(api.Value),
-									any(api.Float{V: 456.7}).(api.Value),
-									any(api.Bool{V: false}).(api.Value),
+									api.String{V: "string"},
+									api.Int{V: 123},
+									api.Float{V: 456.7},
+									api.Bool{V: false},
 								},
-								Value:   any(api.Int{V: 89}).(api.Value),
-								Comment: &Comment{Text: multiComment},
+								Value:   api.Int{V: 89},
+								Comment: multiComment,
 							},
-						},
 						},
 					},
 					{
-						Doc: []*Comment{
-							{
-								Text: "// sql comment 0",
-							},
-							{
-								Text: `/* sql comment 1
+						Doc: []string{
+							"// sql comment 0",
+							`/* sql comment 1
  sql comment 2
 */`,
-							},
 						},
-						Name: Name{Text: "sql"},
-						Params: &Params{List: []*AnnotationParam{
+						Name: "sql",
+						Params: []*api.AnnotationParam{
 							{
-								Key:   Key{Text: "code"},
-								Value: any(api.String{V: "int32"}).(api.Value),
-							},
-							{
-								Key:   Key{Text: "name"},
-								Value: any(api.String{V: "string"}).(api.Value),
+								Key:   "code",
+								Value: api.String{V: "int32"},
 							},
 							{
-								Key:   Key{Text: "message"},
-								Value: any(api.String{V: "string"}).(api.Value),
+								Key:   "name",
+								Value: api.String{V: "string"},
+							},
+							{
+								Key:   "message",
+								Value: api.String{V: "string"},
 							},
 						},
-						},
-						Comment: &Comment{
-							Text: "// sql inline comment",
-						},
+						Comment: "// sql inline comment",
 					},
 				},
 			},

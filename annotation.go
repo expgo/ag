@@ -177,7 +177,7 @@ var annotationParser = participle.MustBuild[Annotations](
 	participle.Lexer(lexer.NewTextScannerLexer(func(s *scanner.Scanner) {
 		s.Mode &^= scanner.SkipComments
 	})),
-	participle.Union[api.Value](api.Bool{}, api.Float{}, api.Int{}, api.Uint{}, api.String{}),
+	participle.Union[api.Value](api.Bool{}, api.Float{}, api.Int{}, api.Uint{}, api.String{}, api.Slice{}),
 	participle.Unquote("String"),
 )
 
