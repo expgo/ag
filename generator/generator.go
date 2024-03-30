@@ -105,7 +105,8 @@ func GenerateFile(filename string, outputSuffix string) {
 	buf.WriteString("\n\n")
 
 	buf.WriteString("import (\n")
-	for _, gen := range gens {
+	for i, gen := range gens {
+		println("Creating " + plugins[i] + " imports")
 		importList := gen.GetImports()
 		for _, imp := range importList {
 			buf.WriteString("\t\"" + imp + "\"\n")
@@ -113,7 +114,8 @@ func GenerateFile(filename string, outputSuffix string) {
 	}
 	buf.WriteString(")\n\n")
 
-	for _, gen := range gens {
+	for i, gen := range gens {
+		println("Creating " + plugins[i] + " const")
 		err = gen.WriteConst(buf)
 		if err != nil {
 			panic(err)
@@ -121,7 +123,8 @@ func GenerateFile(filename string, outputSuffix string) {
 	}
 	buf.WriteString("\n\n")
 
-	for _, gen := range gens {
+	for i, gen := range gens {
+		println("Creating " + plugins[i] + " func")
 		err = gen.WriteInitFunc(buf)
 		if err != nil {
 			panic(err)
@@ -129,7 +132,8 @@ func GenerateFile(filename string, outputSuffix string) {
 	}
 	buf.WriteString("\n\n")
 
-	for _, gen := range gens {
+	for i, gen := range gens {
+		println("Creating " + plugins[i] + " body")
 		err = gen.WriteBody(buf)
 		if err != nil {
 			panic(err)

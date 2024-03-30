@@ -130,7 +130,7 @@ func (pp *PluginProgram) build() {
 		println("do mod tidy")
 		pp.runCommand(pp.baseDir, "go", "mod", "tidy")
 		println("do mod update")
-		pp.runCommand(pp.baseDir, "go", "get", "-u", ".")
+		pp.runCommand(pp.baseDir, "go", "get", "-u", "./...")
 	}
 
 	if newCreate || pp.devMode {
