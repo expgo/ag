@@ -65,7 +65,6 @@ func GenerateFile(filename string, outputSuffix string) {
 
 	for _, f := range factories {
 		if ftas := filterTypedAnnotation(typedAnnotations, f.Annotations()); len(ftas) > 0 {
-			println(len(typedAnnotations) + 10)
 			gen, e := f.New(ftas)
 			if e != nil {
 				panic(e)
