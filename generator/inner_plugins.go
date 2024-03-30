@@ -1,5 +1,5 @@
 package generator
 
-import (
-	_ "github.com/expgo/enum"
-)
+//import (
+//	_ "github.com/expgo/enum"
+//)

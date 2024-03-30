@@ -4,6 +4,7 @@ import (
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/expgo/ag/api"
+	"github.com/expgo/structure"
 	"text/scanner"
 )
 
@@ -118,10 +119,10 @@ func (a *Annotation) toApi() *api.Annotation {
 
 type AnnotationParam struct {
 	Pos     lexer.Position
-	Doc     []*Comment `@@*`
-	Key     Key        `@@`
-	Value   api.Value  `@@? ","?`
-	Comment *Comment   `@@?`
+	Doc     []*Comment             `@@*`
+	Key     Key                    `@@`
+	Value   structure.ValueWrapper `@@? ","?`
+	Comment *Comment               `@@?`
 }
 
 func (ap *AnnotationParam) toApi() *api.AnnotationParam {
@@ -135,11 +136,11 @@ func (ap *AnnotationParam) toApi() *api.AnnotationParam {
 
 type AnnotationExtend struct {
 	Pos     lexer.Position
-	Doc     []*Comment  `@@*`
-	Name    Name        `@@`
-	Values  []api.Value `("(" @@* ")")?`
-	Value   api.Value   `("=" @@)? ","?`
-	Comment *Comment    `@@?`
+	Doc     []*Comment               `@@*`
+	Name    Name                     `@@`
+	Values  []structure.ValueWrapper `("(" @@* ")")?`
+	Value   structure.ValueWrapper   `("=" @@)? ","?`
+	Comment *Comment                 `@@?`
 }
 
 func (ae AnnotationExtend) toApi() *api.AnnotationExtend {
@@ -177,7 +178,7 @@ var annotationParser = participle.MustBuild[Annotations](
 	participle.Lexer(lexer.NewTextScannerLexer(func(s *scanner.Scanner) {
 		s.Mode &^= scanner.SkipComments
 	})),
-	participle.Union[api.Value](api.Bool{}, api.Float{}, api.Int{}, api.Uint{}, api.String{}, api.Slice{}),
+	participle.Union[structure.ValueWrapper](api.Bool{}, api.Float{}, api.Int{}, api.Uint{}, api.String{}, api.Slice{}),
 	participle.Unquote("String"),
 )
 

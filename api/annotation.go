@@ -22,19 +22,17 @@ type Annotation struct {
 type AnnotationParam struct {
 	Doc     []string
 	Key     string
-	Value   Value
+	Value   structure.ValueWrapper
 	Comment string
 }
 
 type AnnotationExtend struct {
 	Doc     []string
 	Name    string
-	Values  []Value
-	Value   Value
+	Values  []structure.ValueWrapper
+	Value   structure.ValueWrapper
 	Comment string
 }
-
-type Value interface{ Value() any }
 
 type Float struct {
 	V float64 `@Float ","? `
@@ -82,14 +80,14 @@ func (b Bool) Value() any {
 }
 
 type Slice struct {
-	V []Value `"{" @@* "}"`
+	V []structure.ValueWrapper `"{" @@* "}"`
 }
 
 func (s Slice) Value() any {
 	return s.V
 }
 
-var defaultBoolValue = any(Bool{V: true}).(Value)
+var defaultBoolValue = Bool{V: true}
 
 func (a *Annotation) To(t any) (err error) {
 	if t == nil {
@@ -122,7 +120,7 @@ func (a *Annotation) To(t any) (err error) {
 			}
 
 			if ap.Value != nil {
-				value := structure.MustConvertToType(ap.Value.Value(), fieldValue.Type())
+				value := structure.MustConvertToType(ap.Value, fieldValue.Type())
 				if structure.SetFieldBySetMethod(fieldValue, value, structField, rootValues[len(rootValues)-1]) {
 					return nil
 				}
