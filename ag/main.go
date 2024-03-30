@@ -45,7 +45,7 @@ func main() {
 		}
 	}
 
-	if len(plugins) > 0 {
+	if len(plugins) > 0 || len(devPlugin) > 0 {
 		runPlugins(filename, fileSuffix, plugins, devPlugin, rebuild)
 	} else {
 		generator.GenerateFile(filename, fileSuffix)
