@@ -12,7 +12,7 @@ require (
 )
 
 require (
-	github.com/expgo/enum v0.0.0-20240329035039-ac20afc928d7 // indirect
+	github.com/expgo/enum v0.0.0-20240330160811-3db3fc01bbc6 // indirect
 	github.com/expr-lang/expr v1.16.3 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	golang.org/x/mod v0.16.0 // indirect
