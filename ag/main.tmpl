@@ -12,9 +12,11 @@ import (
 func main() {
 	var filename string
 	var fileSuffix string
+	var packageMode bool
 
 	flag.StringVar(&filename, "file", "", "The file is used to generate the annotation file.")
 	flag.StringVar(&fileSuffix, "suffix", "_ag", "Changes the default filename suffix of _ag to something else.")
+	flag.BoolVar(&packageMode, "package-mode", false, "If true, ag will work on package mode.")
 
 	flag.Parse()
 
@@ -22,6 +24,6 @@ func main() {
 		return
 	}
 
-	generator.GenerateFile(filename, fileSuffix)
+	generator.GenerateFile(filename, fileSuffix, packageMode)
 }
 {{end -}}

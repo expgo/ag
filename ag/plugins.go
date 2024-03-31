@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"embed"
 	"fmt"
+	"github.com/expgo/structure"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -38,8 +39,9 @@ type PluginProgram struct {
 	rebuild      bool
 	devMode      bool
 	// -------------
-	filename   string
-	fileSuffix string
+	filename    string
+	fileSuffix  string
+	packageMode bool
 }
 
 func getPathHash(plugins []string) string {
@@ -55,27 +57,6 @@ func getExePath() string {
 	}
 
 	return filepath.Join(filepath.Dir(exeFile), ".ag")
-}
-
-func runPlugins(filename string, fileSuffix string, plugins []string, rebuild bool, devPlugin string, devPluginDir string) {
-	pp := &PluginProgram{
-		Plugins:      plugins,
-		devPlugin:    devPlugin,
-		devPluginDir: devPluginDir,
-		rebuild:      rebuild,
-		filename:     filename,
-		fileSuffix:   fileSuffix,
-	}
-
-	if len(devPlugin) > 0 {
-		pp.Plugins = append(pp.Plugins, devPlugin)
-	}
-
-	hash := getPathHash(plugins)
-	pp.baseDir = filepath.Join(getExePath(), hash)
-	pp.devMode = len(pp.devPlugin) > 0
-
-	pp.run()
 }
 
 func (pp *PluginProgram) writeMain() {
@@ -196,7 +177,7 @@ func (pp *PluginProgram) run() {
 		panic(err)
 	}
 	println("run ag plugin program, workDir: ", workDir)
-	pp.runCommand(workDir, agExe, "-file", pp.filename, "-suffix", pp.fileSuffix)
+	pp.runCommand(workDir, agExe, "-file", pp.filename, "-suffix", pp.fileSuffix, "-package-mode", structure.MustConvertTo[string](pp.packageMode))
 }
 
 func (pp *PluginProgram) runCommand(workDir string, name string, arg ...string) {

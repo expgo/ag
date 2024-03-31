@@ -33,7 +33,37 @@ func filterTypedAnnotation(typedAnnotations []*api.TypedAnnotation, annotationMa
 	return stream.Must(filteredAnnotations.Distinct(func(preItem, nextItem *api.TypedAnnotation) (bool, error) { return preItem == nextItem, nil }).ToSlice())
 }
 
-func GenerateFile(filename string, outputSuffix string) {
+func getAllTypedAnnotations(filename string, typeMaps map[api.AnnotationType]stream.Stream[string], packageMode bool) (result []*api.TypedAnnotation, packageName string, e error) {
+	if packageMode {
+		result, packageName, e = ag.ParseFile(filename, typeMaps)
+
+		workDir, err := os.Getwd()
+		if err != nil {
+			e = err
+			return
+		}
+		// 获取当前目录下除filename和_test.go后缀的所有go文件
+		files, err := filepath.Glob(filepath.Join(workDir, "*.go"))
+		if err != nil {
+			return nil, "", err
+		}
+		for _, file := range files {
+			if file != filename && !strings.HasSuffix(file, "_test.go") {
+				ta, _, err := ag.ParseFile(file, typeMaps)
+				if err != nil {
+					return nil, "", err
+				}
+				result = append(result, ta...)
+			}
+		}
+
+		return
+	} else {
+		return ag.ParseFile(filename, typeMaps)
+	}
+}
+
+func GenerateFile(filename string, outputSuffix string, packageMode bool) {
 	factories := factory.FindInterfaces[api.GeneratorFactory]()
 	if len(factories) == 0 {
 		println("No GeneratorFactory was found for the annotation generator.")
@@ -50,7 +80,7 @@ func GenerateFile(filename string, outputSuffix string) {
 		}
 	}
 
-	typedAnnotations, packageName, err := ag.ParseFile(filename, typeMaps)
+	typedAnnotations, packageName, err := getAllTypedAnnotations(filename, typeMaps, packageMode)
 	if err != nil {
 		println(err.Error())
 		return
