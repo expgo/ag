@@ -116,15 +116,7 @@ func (pp *PluginProgram) build() {
 
 		if pp.devMode {
 			// write replace to go.mod
-			workDir, err := os.Getwd()
-			if err != nil {
-				panic(err)
-			}
-			absWorkDir, err := filepath.Abs(filepath.Join(workDir, pp.devPluginDir))
-			if err != nil {
-				panic(err)
-			}
-			pp.runCommand(pp.baseDir, "bash", "-c", fmt.Sprintf(`echo "replace %s => %s" >> %s`, pp.devPlugin, absWorkDir, AGFileGoMod.Val()))
+			pp.writeReplace()
 		}
 
 		println("do mod tidy")
@@ -144,6 +136,42 @@ func (pp *PluginProgram) build() {
 	if !pp.devMode {
 		println("remove go files")
 		pp.runCommand(pp.baseDir, "rm", AGFileGoMod.Val(), AGFileGoSum.Val(), AGFileMainGo.Val())
+	}
+}
+
+func (pp *PluginProgram) writeReplace() {
+	workDir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	absPluginDir, err := filepath.Abs(filepath.Join(workDir, pp.devPluginDir))
+	if err != nil {
+		panic(err)
+	}
+
+	modFilePath := filepath.Join(absPluginDir, AGFileGoMod.Val())
+
+	_, err = os.Stat(modFilePath)
+	if os.IsNotExist(err) {
+		panic(fmt.Sprintf("go.mod not exist in %s", absPluginDir))
+	}
+
+	// 从go.mod中获取模块名称
+	data, err := os.ReadFile(modFilePath)
+	if err != nil {
+		println(err)
+		return
+	}
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "module") {
+			parts := strings.Fields(line)
+			if len(parts) > 1 {
+				moduleName := parts[1]
+				pp.runCommand(pp.baseDir, "bash", "-c", fmt.Sprintf(`echo "replace %s => %s" >> %s`, moduleName, absPluginDir, AGFileGoMod.Val()))
+				return
+			}
+		}
 	}
 }
 
