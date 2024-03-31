@@ -11,6 +11,8 @@ github.com/expgo/factory v0.0.0-20240327144822-6d2b1392e375 h1:gQGRQ+12psxyMyn06
 github.com/expgo/factory v0.0.0-20240327144822-6d2b1392e375/go.mod h1:Ssm7eO31wbEAzrn0fl/OoglFtPCgQ8WLSXUXAPmsMmw=
 github.com/expgo/factory v0.0.0-20240331054754-9e337099fc19 h1:suyjmORgUQOZmEx8E+mG4qNHxFwwzyfrCm8utw3ONzA=
 github.com/expgo/factory v0.0.0-20240331054754-9e337099fc19/go.mod h1:T+ZVWsHgs9YHF6So99KTDmRyDkkjuVqr3V14QlT04aA=
+github.com/expgo/factory v0.0.0-20240331062605-e885e69c6426 h1:1WxRHYiaeTXH6KOMeNh2BHGqfzTEas4QJWr5v/ubJqs=
+github.com/expgo/factory v0.0.0-20240331062605-e885e69c6426/go.mod h1:T+ZVWsHgs9YHF6So99KTDmRyDkkjuVqr3V14QlT04aA=
 github.com/expgo/generic v0.0.0-20240323131353-339c0d4e5e11 h1:cWUgCuzaYf5WhAmgfsjQjAkug6357xree+yILbHUzIE=
 github.com/expgo/generic v0.0.0-20240323131353-339c0d4e5e11/go.mod h1:Q3Y49UmlJcsKsmbWI6VA4+Z+N66PfJcSOPM+XC/N1y8=
 github.com/expgo/structure v0.0.0-20240330155600-da719deecafd h1:AwfQPc0VGnJldbnqvYjKnDMmQxxa9UVBXP79vG543yQ=
