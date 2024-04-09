@@ -34,6 +34,11 @@ func filterTypedAnnotation(typedAnnotations []*api.TypedAnnotation, annotationMa
 }
 
 func getAllTypedAnnotations(filename string, typeMaps map[api.AnnotationType]stream.Stream[string], packageMode bool) (result []*api.TypedAnnotation, packageName string, e error) {
+	filename, e = filepath.Abs(filename)
+	if e != nil {
+		return
+	}
+
 	if packageMode {
 		result, packageName, e = ag.ParseFile(filename, typeMaps)
 

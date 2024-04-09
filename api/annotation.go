@@ -115,6 +115,10 @@ func (a *Annotation) To(t any) (err error) {
 				return nil
 			}
 
+			if fieldValue.Kind() == reflect.Bool && ap.Value == nil {
+				ap.Value = defaultBoolValue
+			}
+
 			if ap.Value != nil {
 				value := structure.MustConvertToType(ap.Value, fieldValue.Type())
 				if structure.SetFieldBySetMethod(fieldValue, value, structField, rootValues[len(rootValues)-1]) {

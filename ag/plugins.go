@@ -177,7 +177,7 @@ func (pp *PluginProgram) run() {
 		panic(err)
 	}
 	println("run ag plugin program, workDir: ", workDir)
-	pp.runCommand(workDir, agExe, "-file", pp.filename, "-suffix", pp.fileSuffix, "-package-mode", structure.MustConvertTo[string](pp.packageMode))
+	pp.runCommand(workDir, agExe, "-file="+pp.filename, "-suffix="+pp.fileSuffix, "-package-mode="+structure.MustConvertTo[string](pp.packageMode))
 }
 
 func (pp *PluginProgram) runCommand(workDir string, name string, arg ...string) {

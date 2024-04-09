@@ -58,6 +58,7 @@ func main() {
 			rebuild:      rebuild,
 			filename:     filename,
 			fileSuffix:   fileSuffix,
+			packageMode:  packageMode,
 		}
 
 		if len(devPlugin) > 0 {
