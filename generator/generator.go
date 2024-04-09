@@ -75,6 +75,19 @@ func GenerateFile(filename string, outputSuffix string, packageMode bool) {
 		return
 	}
 
+	// sort factories by order
+	factories = stream.Must(stream.Of(factories).Sort(func(x, y api.GeneratorFactory) int {
+		xOrder := api.NormalOrder
+		if xO, ok := y.(api.Order); ok {
+			xOrder = xO.Order()
+		}
+		yOrder := api.NormalOrder
+		if yO, ok := y.(api.Order); ok {
+			yOrder = yO.Order()
+		}
+		return xOrder - yOrder
+	}).ToSlice())
+
 	typeMaps := map[api.AnnotationType]stream.Stream[string]{}
 	for _, f := range factories {
 		annotations := f.Annotations()
