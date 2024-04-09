@@ -85,6 +85,12 @@ func GenerateFile(filename string, outputSuffix string, packageMode bool) {
 		if yO, ok := y.(api.Order); ok {
 			yOrder = yO.Order()
 		}
+
+		if xOrder == yOrder {
+			xTypePath := reflect.TypeOf(x).Elem().PkgPath()
+			yTypePath := reflect.TypeOf(y).Elem().PkgPath()
+			return strings.Compare(xTypePath, yTypePath)
+		}
 		return xOrder - yOrder
 	}).ToSlice())
 
