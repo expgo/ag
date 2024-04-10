@@ -25,6 +25,8 @@ github.com/expgo/factory v0.0.0-20240409144404-7e0c05c84c49 h1:NVrzkf7teNWjwEvkm
 github.com/expgo/factory v0.0.0-20240409144404-7e0c05c84c49/go.mod h1:T+ZVWsHgs9YHF6So99KTDmRyDkkjuVqr3V14QlT04aA=
 github.com/expgo/factory v0.0.0-20240409152029-d12aa1d5a355 h1:Z+60jBmrc39zYKJSg6CLfvMKP/YHgwCAhDTXno120tY=
 github.com/expgo/factory v0.0.0-20240409152029-d12aa1d5a355/go.mod h1:T+ZVWsHgs9YHF6So99KTDmRyDkkjuVqr3V14QlT04aA=
+github.com/expgo/factory v0.0.0-20240410011221-0ab4c36e9d4b h1:Mtn6AKreHO+sSWDlIDN1HLaD7KyKijIqNXRNuFYQfas=
+github.com/expgo/factory v0.0.0-20240410011221-0ab4c36e9d4b/go.mod h1:hg8tUymtbA04jai8PwCAz0+kI+UN0wMeXbw3/FLR1qM=
 github.com/expgo/generic v0.0.0-20240323131353-339c0d4e5e11 h1:cWUgCuzaYf5WhAmgfsjQjAkug6357xree+yILbHUzIE=
 github.com/expgo/generic v0.0.0-20240323131353-339c0d4e5e11/go.mod h1:Q3Y49UmlJcsKsmbWI6VA4+Z+N66PfJcSOPM+XC/N1y8=
 github.com/expgo/generic v0.0.0-20240409065603-afe93fcfb142 h1:KAmbuvbbz+QOmj4a5ywpruHGkDDeZuKr/3v5Kx0swZs=
