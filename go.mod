@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
-	github.com/expgo/factory v0.0.0-20240411133751-3dbbdea19cd7
-	github.com/expgo/generic v0.0.0-20240409150052-f04fcb7e0fd5
+	github.com/expgo/factory v0.0.0-20240411154216-bb7a7e029c04
+	github.com/expgo/generic v0.0.0-20240410123247-e162144797ca
 	github.com/expgo/structure v0.0.0-20240409145933-0849cfa62db1
 	github.com/google/go-cmp v0.6.0
 	golang.org/x/tools v0.19.0
