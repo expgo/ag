@@ -65,7 +65,7 @@ func main() {
 			pp.Plugins = append(pp.Plugins, devPlugin)
 		}
 
-		hash := getPathHash(plugins)
+		hash := getPathHash(append(plugins, devPlugin))
 		pp.baseDir = filepath.Join(getExePath(), hash)
 		pp.devMode = len(pp.devPlugin) > 0
 
