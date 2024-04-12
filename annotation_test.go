@@ -2,6 +2,7 @@ package ag
 
 import (
 	"github.com/expgo/ag/api"
+	"github.com/expgo/structure"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 )
@@ -147,7 +148,7 @@ sql comment2
 							},
 							{
 								Key:   "params",
-								Value: api.Slice{V: []api.Value{api.String{V: "abc"}, api.Int{V: 321}, api.Float{V: 123.4}, api.Bool{V: false}}},
+								Value: api.Slice{V: []structure.ValueWrapper{api.String{V: "abc"}, api.Int{V: 321}, api.Float{V: 123.4}, api.Bool{V: false}}},
 							},
 						},
 					},
@@ -224,7 +225,7 @@ sql comment2
 							},
 							{
 								Name: "GoodWithParams",
-								Values: []api.Value{
+								Values: []structure.ValueWrapper{
 									api.String{V: "string"},
 									api.Int{V: 123},
 									api.Float{V: 456.7},
@@ -234,7 +235,7 @@ sql comment2
 							},
 							{
 								Name: "GoodWithAll",
-								Values: []api.Value{
+								Values: []structure.ValueWrapper{
 									api.String{V: "string"},
 									api.Int{V: 123},
 									api.Float{V: 456.7},
@@ -374,7 +375,7 @@ tag comment 4
 							},
 							{
 								Name: "GoodWithParams",
-								Values: []api.Value{
+								Values: []structure.ValueWrapper{
 									api.String{V: "string"},
 									api.Int{V: 123},
 									api.Float{V: 456.7},
@@ -384,7 +385,7 @@ tag comment 4
 							},
 							{
 								Name: "GoodWithAll",
-								Values: []api.Value{
+								Values: []structure.ValueWrapper{
 									api.String{V: "string"},
 									api.Int{V: 123},
 									api.Float{V: 456.7},

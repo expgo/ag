@@ -59,7 +59,7 @@ func getRecvType(fd *ast.FuncDecl) *ast.TypeSpec {
 	return nil
 }
 
-func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.AnnotationType]stream.Stream[string]) (result []*api.TypedAnnotation, e error) {
+func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.AnnotationType]stream.Stream[string], fileInfo *api.FileInfo) (result []*api.TypedAnnotation, e error) {
 	ast.Inspect(fileNode, func(n ast.Node) bool {
 		switch decl := n.(type) {
 		case *ast.TypeSpec:
@@ -85,7 +85,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.An
 				}
 
 				if annotations != nil {
-					result = append(result, &api.TypedAnnotation{api.AnnotationTypeType, decl, annotations, nil})
+					result = append(result, &api.TypedAnnotation{api.AnnotationTypeType, decl, annotations, nil, fileInfo})
 				}
 			}
 		case *ast.FuncDecl:
@@ -105,7 +105,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.An
 					return false
 				}
 			}
-			funcAnnotation := &api.TypedAnnotation{api.AnnotationTypeFunc, decl, annotations, nil}
+			funcAnnotation := &api.TypedAnnotation{api.AnnotationTypeFunc, decl, annotations, nil, fileInfo}
 
 			if names, ok := typeMaps[api.AnnotationTypeFuncRecv]; ok {
 				if decl.Recv != nil {
@@ -131,7 +131,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.An
 							return false
 						}
 						if recvAnnotations != nil {
-							result = append(result, &api.TypedAnnotation{api.AnnotationTypeFuncRecv, recvType, recvAnnotations, funcAnnotation})
+							result = append(result, &api.TypedAnnotation{api.AnnotationTypeFuncRecv, recvType, recvAnnotations, funcAnnotation, fileInfo})
 						}
 					}
 				}
@@ -159,7 +159,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.An
 						return false
 					}
 					if fieldAnnotations != nil {
-						result = append(result, &api.TypedAnnotation{api.AnnotationTypeFuncField, field, fieldAnnotations, funcAnnotation})
+						result = append(result, &api.TypedAnnotation{api.AnnotationTypeFuncField, field, fieldAnnotations, funcAnnotation, fileInfo})
 					}
 				}
 			}
@@ -176,6 +176,11 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.An
 }
 
 func ParseFile(filename string, typeMaps map[api.AnnotationType]stream.Stream[string]) (result []*api.TypedAnnotation, packageName string, e error) {
+	fileInfo, err := api.GetFileInfo(filename)
+	if err != nil {
+		return nil, "", err
+	}
+
 	filename, _ = filepath.Abs(filename)
 
 	fileNode, fileSet, err := parseFile(filename)
@@ -194,14 +199,14 @@ func ParseFile(filename string, typeMaps map[api.AnnotationType]stream.Stream[st
 					return nil, "", err
 				}
 				if annotations != nil {
-					result = append(result, &api.TypedAnnotation{api.AnnotationTypeGlobal, nil, annotations, nil})
+					result = append(result, &api.TypedAnnotation{api.AnnotationTypeGlobal, fileNode, annotations, nil, fileInfo})
 				}
 			}
 		}
 	}
 
 	// other TypedAnnotation
-	ta, err := inspectFile(fileNode, fileSet, typeMaps)
+	ta, err := inspectFile(fileNode, fileSet, typeMaps, fileInfo)
 	if err != nil {
 		return nil, "", err
 	}

@@ -22,6 +22,7 @@ type TypedAnnotation struct {
 	Node        ast.Node
 	Annotations *Annotations
 	Parent      *TypedAnnotation
+	FileInfo    *FileInfo
 }
 
 type GeneratorFactory interface {
