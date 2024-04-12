@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"embed"
 	"fmt"
+	"github.com/expgo/ag/api"
 	"github.com/expgo/structure"
 	"os"
 	"os/exec"
@@ -34,10 +35,9 @@ type PluginProgram struct {
 	Plugins []string
 	baseDir string
 	// -------------
-	devPlugin    string
-	devPluginDir string
-	rebuild      bool
-	devMode      bool
+	devPlugin string
+	rebuild   bool
+	devMode   bool
 	// -------------
 	filename    string
 	fileSuffix  string
@@ -121,39 +121,12 @@ func (pp *PluginProgram) build() {
 }
 
 func (pp *PluginProgram) writeReplace() {
-	workDir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	absPluginDir, err := filepath.Abs(filepath.Join(workDir, pp.devPluginDir))
+	fi, err := api.GetFileInfo(pp.filename)
 	if err != nil {
 		panic(err)
 	}
 
-	modFilePath := filepath.Join(absPluginDir, AGFileGoMod.Val())
-
-	_, err = os.Stat(modFilePath)
-	if os.IsNotExist(err) {
-		panic(fmt.Sprintf("go.mod not exist in %s", absPluginDir))
-	}
-
-	// 从go.mod中获取模块名称
-	data, err := os.ReadFile(modFilePath)
-	if err != nil {
-		println(err)
-		return
-	}
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "module") {
-			parts := strings.Fields(line)
-			if len(parts) > 1 {
-				moduleName := parts[1]
-				pp.runCommand(pp.baseDir, "bash", "-c", fmt.Sprintf(`echo "replace %s => %s" >> %s`, moduleName, absPluginDir, AGFileGoMod.Val()))
-				return
-			}
-		}
-	}
+	pp.runCommand(pp.baseDir, "bash", "-c", fmt.Sprintf(`echo "replace %s => %s" >> %s`, fi.ModuleName, fi.ModuleAbsLocalPath, AGFileGoMod.Val()))
 }
 
 func (pp *PluginProgram) run() {
