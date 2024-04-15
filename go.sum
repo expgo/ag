@@ -16,8 +16,12 @@ github.com/expgo/factory v0.0.0-20240415032723-f71fbcb209d6 h1:MrkFFoYw/Qz9ccK6w
 github.com/expgo/factory v0.0.0-20240415032723-f71fbcb209d6/go.mod h1:8QWULiOcgFPmC6h8ZXpFG5hxrkaw0ZGKG0skR4EbEX4=
 github.com/expgo/factory v0.0.0-20240415033042-aa974f83fd5e h1:CpjKgO2BxF62Fv6oQRIRl9xgqbkrk6yS4D8WSgxoVpU=
 github.com/expgo/factory v0.0.0-20240415033042-aa974f83fd5e/go.mod h1:LUKAbHmschBLPO2Ss9hQKfhR8DIal6ZfwBxH0b7Z0AE=
+github.com/expgo/factory v0.0.0-20240415074342-b591d453dd90 h1:63I5lUDDK2frP/FrzbtNJUmkS9Mc1K7pYqX5F299x6I=
+github.com/expgo/factory v0.0.0-20240415074342-b591d453dd90/go.mod h1:njF704fzdIIWFWVx2wD9yQbZdKNiD+DKj+RKKKFLpJY=
 github.com/expgo/generic v0.0.0-20240410123247-e162144797ca h1:/+jU23qxfKaI7NLQ+1Ut7wR7o2ccg4SYLGERnobFpo4=
 github.com/expgo/generic v0.0.0-20240410123247-e162144797ca/go.mod h1:Q3Y49UmlJcsKsmbWI6VA4+Z+N66PfJcSOPM+XC/N1y8=
+github.com/expgo/generic v0.0.0-20240415070051-4357d19d9b70 h1:u8uBpXKlOBFydfKtzBgZEUG58oc+WvhfGmkIO3As/7c=
+github.com/expgo/generic v0.0.0-20240415070051-4357d19d9b70/go.mod h1:Q3Y49UmlJcsKsmbWI6VA4+Z+N66PfJcSOPM+XC/N1y8=
 github.com/expgo/log v0.0.0-20240412060431-bd197ac46bef h1:DShOCqb6P2+Ld0RmrxXf0e66MMgZhixpiPc3MEUWRzQ=
 github.com/expgo/log v0.0.0-20240412060431-bd197ac46bef/go.mod h1:rNLjCPXpVvusYdtuHkBICQ3uPmGlVkbbbWq+kvFvH0w=
 github.com/expgo/structure v0.0.0-20240409145933-0849cfa62db1 h1:2fcKSKZlBBibWukb7aXbGk7SGVxZSPM1JbwVKtZjp7M=
