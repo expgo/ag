@@ -6,34 +6,50 @@ import (
 	"github.com/expgo/ag"
 	"github.com/expgo/ag/api"
 	"github.com/expgo/factory"
-	"github.com/expgo/generic/stream"
 	"golang.org/x/tools/imports"
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 )
 
 func filterTypedAnnotation(typedAnnotations []*api.TypedAnnotation, annotationMap map[string][]api.AnnotationType) []*api.TypedAnnotation {
-	filteredAnnotations := stream.Of[*api.TypedAnnotation](nil)
+	filteredAnnotations := []*api.TypedAnnotation{}
 	for _, ta := range typedAnnotations {
 		if ta.Annotations != nil {
 			for name, annotationTypes := range annotationMap {
 				if an := ta.Annotations.FindAnnotationByName(name); an != nil {
-					if stream.Must(stream.Of(annotationTypes).Contains(ta.Type, func(x, y api.AnnotationType) (bool, error) {
-						return x == y, nil
-					})) {
-						filteredAnnotations = filteredAnnotations.Append(ta)
+					for _, annotationType := range annotationTypes {
+						if annotationType == ta.Type {
+							filteredAnnotations = append(filteredAnnotations, ta)
+							break
+						}
 					}
 				}
 			}
 		}
 	}
 
-	return stream.Must(filteredAnnotations.Distinct(func(preItem, nextItem *api.TypedAnnotation) (bool, error) { return preItem == nextItem, nil }).ToSlice())
+	distinctAnnotations := []*api.TypedAnnotation{}
+	for _, annotationType := range filteredAnnotations {
+		contains := false
+		for _, da := range distinctAnnotations {
+			if da == annotationType {
+				contains = true
+				break
+			}
+		}
+
+		if !contains {
+			distinctAnnotations = append(distinctAnnotations, annotationType)
+		}
+	}
+
+	return distinctAnnotations
 }
 
-func getAllTypedAnnotations(filename string, typeMaps map[api.AnnotationType]stream.Stream[string], packageMode bool) (result []*api.TypedAnnotation, packageName string, e error) {
+func getAllTypedAnnotations(filename string, typeMaps map[api.AnnotationType][]string, packageMode bool) (result []*api.TypedAnnotation, packageName string, e error) {
 	filename, e = filepath.Abs(filename)
 	if e != nil {
 		return
@@ -76,7 +92,10 @@ func GenerateFile(filename string, outputSuffix string, packageMode bool) {
 	}
 
 	// sort factories by order
-	factories = stream.Must(stream.Of(factories).Sort(func(x, y api.GeneratorFactory) int {
+	sort.Slice(factories, func(i, j int) bool {
+		x := factories[i]
+		y := factories[j]
+
 		xOrder := api.OrderNormal
 		if xO, ok := y.(api.IOrder); ok {
 			xOrder = xO.Order()
@@ -89,17 +108,17 @@ func GenerateFile(filename string, outputSuffix string, packageMode bool) {
 		if xOrder == yOrder {
 			xTypePath := reflect.TypeOf(x).Elem().PkgPath()
 			yTypePath := reflect.TypeOf(y).Elem().PkgPath()
-			return strings.Compare(xTypePath, yTypePath)
+			return strings.Compare(xTypePath, yTypePath) < 0
 		}
-		return xOrder.Val() - yOrder.Val()
-	}).ToSlice())
+		return xOrder.Val()-yOrder.Val() < 0
+	})
 
-	typeMaps := map[api.AnnotationType]stream.Stream[string]{}
+	typeMaps := map[api.AnnotationType][]string{}
 	for _, f := range factories {
 		annotations := f.Annotations()
 		for name, types := range annotations {
 			for _, t := range types {
-				typeMaps[t] = typeMaps[t].Append(name)
+				typeMaps[t] = append(typeMaps[t], name)
 			}
 		}
 	}

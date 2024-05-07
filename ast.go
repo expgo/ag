@@ -3,7 +3,6 @@ package ag
 import (
 	"fmt"
 	"github.com/expgo/ag/api"
-	"github.com/expgo/generic/stream"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -21,15 +20,16 @@ func parseFile(inputFile string) (*ast.File, *token.FileSet, error) {
 	return fileNode, fileSet, nil
 }
 
-func getAnnotations(parseName string, names stream.Stream[string], comments string) (*api.Annotations, error) {
+func getAnnotations(parseName string, names []string, comments string) (*api.Annotations, error) {
 	lowComments := strings.ToLower(comments)
-	if stream.Must(names.AnyMatch(func(s string) (bool, error) { return strings.Contains(lowComments, "@"+strings.ToLower(s)), nil })) {
-		ag, err := ParseAnnotation(parseName, comments)
-		if err != nil {
-			return nil, fmt.Errorf("parse annotation err: %v", err)
+	for _, name := range names {
+		if strings.Contains(lowComments, "@"+strings.ToLower(name)) {
+			ag, err := ParseAnnotation(parseName, comments)
+			if err != nil {
+				return nil, fmt.Errorf("parse annotation err: %v", err)
+			}
+			return ag, nil
 		}
-
-		return ag, nil
 	}
 	return nil, nil
 }
@@ -59,7 +59,7 @@ func getRecvType(fd *ast.FuncDecl) *ast.TypeSpec {
 	return nil
 }
 
-func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.AnnotationType]stream.Stream[string], fileInfo *api.FileInfo) (result []*api.TypedAnnotation, e error) {
+func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.AnnotationType][]string, fileInfo *api.FileInfo) (result []*api.TypedAnnotation, e error) {
 	ast.Inspect(fileNode, func(n ast.Node) bool {
 		switch decl := n.(type) {
 		case *ast.TypeSpec:
@@ -175,7 +175,7 @@ func inspectFile(fileNode *ast.File, fileSet *token.FileSet, typeMaps map[api.An
 	return
 }
 
-func ParseFile(filename string, typeMaps map[api.AnnotationType]stream.Stream[string]) (result []*api.TypedAnnotation, packageName string, e error) {
+func ParseFile(filename string, typeMaps map[api.AnnotationType][]string) (result []*api.TypedAnnotation, packageName string, e error) {
 	fileInfo, err := api.GetFileInfo(filename)
 	if err != nil {
 		return nil, "", err

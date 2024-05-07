@@ -4,12 +4,10 @@ github.com/alecthomas/participle/v2 v2.1.1/go.mod h1:Y1+hAs8DHPmc3YUFzqllV+eSQ9l
 github.com/alecthomas/repr v0.2.0 h1:HAzS41CIzNW5syS8Mf9UwXhNH1J9aix/BvDRf1Ml2Yk=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/expgo/enum v0.0.0-20240412062344-c2520b6c072e h1:KUf3OEZEeiJcjh1bDJVEHBkyLNa/oKzaPh5Rxi+SesA=
-github.com/expgo/enum v0.0.0-20240412062344-c2520b6c072e/go.mod h1:wCayluqY5IyXi2KzNnlwwjptdfNV6I4wvfuTXh4Z8ZU=
+github.com/expgo/enum v0.0.0-20240507032315-382b71a38486 h1:M7ik+StL+dftEeJWodq6hkw2cxCuCoMR9jdxJsJ3fCE=
+github.com/expgo/enum v0.0.0-20240507032315-382b71a38486/go.mod h1:TPt3S9TmAPeGPqI8wTa+2284beFacQ891VpInxeAFW0=
 github.com/expgo/factory v0.0.0-20240506101817-8a6fa2281886 h1:5SpYU1W6hpMijH0gsOmTgL5SfZvSGQuYxJFrH8Dxd6c=
 github.com/expgo/factory v0.0.0-20240506101817-8a6fa2281886/go.mod h1:YTT85dMAqW8ctqizX4OS9fRF3TAe9xQPoh8TnSG0ylY=
-github.com/expgo/generic v0.0.0-20240415070051-4357d19d9b70 h1:u8uBpXKlOBFydfKtzBgZEUG58oc+WvhfGmkIO3As/7c=
-github.com/expgo/generic v0.0.0-20240415070051-4357d19d9b70/go.mod h1:Q3Y49UmlJcsKsmbWI6VA4+Z+N66PfJcSOPM+XC/N1y8=
 github.com/expgo/log v0.0.0-20240506154229-bb986179f7a7 h1:KnI7FJTn5ZWy8w3j8E2mewOvDDCFuYpn/h8f7N5ZQxc=
 github.com/expgo/log v0.0.0-20240506154229-bb986179f7a7/go.mod h1:tNfnT5kEtKA/BtCoEKm4QptrMAXxksSw22W8lAhm8Hc=
 github.com/expgo/structure v0.0.0-20240430162200-172eb0aa3964 h1:0rxwAopHSYIfm/lyHtf4/ZM4NWB/Q1TKxxyHuaSyxIg=

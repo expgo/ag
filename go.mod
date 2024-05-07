@@ -4,9 +4,8 @@ go 1.20
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
-	github.com/expgo/enum v0.0.0-20240412062344-c2520b6c072e
+	github.com/expgo/enum v0.0.0-20240507032315-382b71a38486
 	github.com/expgo/factory v0.0.0-20240506101817-8a6fa2281886
-	github.com/expgo/generic v0.0.0-20240415070051-4357d19d9b70
 	github.com/expgo/log v0.0.0-20240506154229-bb986179f7a7
 	github.com/expgo/structure v0.0.0-20240430162200-172eb0aa3964
 	github.com/google/go-cmp v0.6.0
