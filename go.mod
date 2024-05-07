@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
-	github.com/expgo/enum v0.0.0-20240507032315-382b71a38486
-	github.com/expgo/factory v0.0.0-20240506101817-8a6fa2281886
+	github.com/expgo/enum v0.0.0-20240507083629-ce1c055cc01b
+	github.com/expgo/factory v0.0.0-20240507074745-8a125aed7ad8
 	github.com/expgo/log v0.0.0-20240506154229-bb986179f7a7
-	github.com/expgo/structure v0.0.0-20240430162200-172eb0aa3964
+	github.com/expgo/structure v0.0.0-20240507071234-2d40ccf98e58
 	github.com/google/go-cmp v0.6.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/mod v0.17.0
