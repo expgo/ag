@@ -16,11 +16,13 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/expgo/equal v0.0.0-20240827075754-139ab9a9e29f // indirect
+	github.com/expgo/generic v0.0.0-20240814064603-ecd54aed10dc // indirect
 	github.com/expgo/sync v0.0.0-20240603064429-fb40bfd6db49 // indirect
 	github.com/expr-lang/expr v1.16.9 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
-	github.com/petermattis/goid v0.0.0-20240716203034-badd1c0974d6 // indirect
+	github.com/petermattis/goid v0.0.0-20240813172612-4fcff4a6cae7 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/sasha-s/go-deadlock v0.3.1 // indirect
+	github.com/sasha-s/go-deadlock v0.3.5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
