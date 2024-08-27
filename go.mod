@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
-	github.com/expgo/enum v0.0.0-20240625065720-b6e435eb0b3e
+	github.com/expgo/enum v0.0.0-20240827105302-6abf8ac40d28
 	github.com/expgo/factory v0.0.0-20240729025727-c5697ba5cff2
 	github.com/expgo/log v0.0.0-20240517023735-199bf09720ed
 	github.com/expgo/structure v0.0.0-20240515010801-898cf0e94ad3

@@ -6,6 +6,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/expgo/enum v0.0.0-20240625065720-b6e435eb0b3e h1:O6ila06Z4dJosGmcEDcD+FGR56T4/p3aKvMDGsmK4x8=
 github.com/expgo/enum v0.0.0-20240625065720-b6e435eb0b3e/go.mod h1:K1HG3kAVohIemEvt8gfb68tteq2nl+HlJRmWYalTUc8=
+github.com/expgo/enum v0.0.0-20240827105302-6abf8ac40d28 h1:NgrYswblYcDi7FXCTYDRmB4drk54FhM1tflaiu5ihhg=
+github.com/expgo/enum v0.0.0-20240827105302-6abf8ac40d28/go.mod h1:K1HG3kAVohIemEvt8gfb68tteq2nl+HlJRmWYalTUc8=
 github.com/expgo/equal v0.0.0-20240827073424-4bbc48643aff h1:LAPKUSJVwz+o8dWruS/uTH+Z5fGGIaqtA+QzpoMdMm8=
 github.com/expgo/equal v0.0.0-20240827073424-4bbc48643aff/go.mod h1:dnLtTyjftLf1L9rSgjvxEAbMiAoKIliyvsdp66JF1iA=
 github.com/expgo/equal v0.0.0-20240827073945-2346a79e5b74 h1:/pLpm/O2Eumdnq6RTOTj5XYQZEunnHBKQbtuXM3vWoM=
