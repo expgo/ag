@@ -4,7 +4,8 @@ go 1.20
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
-	github.com/expgo/enum v0.0.0-20240827105302-6abf8ac40d28
+	github.com/expgo/enum v0.0.0-20250218090637-f06063cbe7cc
+	github.com/expgo/equal v0.0.0-20240827075754-139ab9a9e29f
 	github.com/expgo/factory v0.0.0-20240729025727-c5697ba5cff2
 	github.com/expgo/log v0.0.0-20240517023735-199bf09720ed
 	github.com/expgo/structure v0.0.0-20240515010801-898cf0e94ad3
@@ -16,7 +17,6 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/expgo/equal v0.0.0-20240827075754-139ab9a9e29f // indirect
 	github.com/expgo/generic v0.0.0-20240814064603-ecd54aed10dc // indirect
 	github.com/expgo/sync v0.0.0-20240603064429-fb40bfd6db49 // indirect
 	github.com/expr-lang/expr v1.16.9 // indirect
